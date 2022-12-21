@@ -40,7 +40,7 @@ int main() {
     pg_t pg, *p_pg;
 
     tabInv = creaTabInv(50);//ipotizzo che ci siano massimo 50 oggetti nel file
-
+    leggiOggetti("inventario.txt",tabInv);
 #if DBG
     stampaTabInv(tabInv);
 #endif /* DBG */

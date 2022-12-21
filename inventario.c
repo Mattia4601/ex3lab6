@@ -34,7 +34,7 @@ void stampaOggetto(inv_t oggetto){
            oggetto.stat.hp,oggetto.stat.mp,oggetto.stat.atk,oggetto.stat.def,oggetto.stat.mag,oggetto.stat.spr);
 }
 //funzione che legge da file i vari oggetti e li salva nella tabella inventario
-void leggiOggetti(char *filename,tabInv_t **p_tabInv){
+void leggiOggetti(char *filename,tabInv_t *p_tabInv){
     FILE *fp;
     int i=0;
     fp = fopen(filename,"r");
@@ -42,11 +42,11 @@ void leggiOggetti(char *filename,tabInv_t **p_tabInv){
         printf("Errore apertura file\n");
         exit(-1);
     }
-    fscanf(fp,"%d",&(*p_tabInv)->nInv);
+    fscanf(fp,"%d",&(p_tabInv)->nInv);
 
-    while ( fscanf(fp,"%s%s%d%d%d%d%d%d",(*p_tabInv)->vettInv[i].nome,(*p_tabInv)->vettInv[i].tipo,
-                  &(*p_tabInv)->vettInv[i].stat.hp,&(*p_tabInv)->vettInv[i].stat.mp,&(*p_tabInv)->vettInv[i].stat.atk,
-            &(*p_tabInv)->vettInv[i].stat.def,&(*p_tabInv)->vettInv[i].stat.mag,&(*p_tabInv)->vettInv[i].stat.spr) != 8){
+    while ( fscanf(fp,"%s%s%d%d%d%d%d%d",p_tabInv->vettInv[i].nome,p_tabInv->vettInv[i].tipo,
+                  &(p_tabInv)->vettInv[i].stat.hp,&(p_tabInv)->vettInv[i].stat.mp,&(p_tabInv)->vettInv[i].stat.atk,
+            &(p_tabInv)->vettInv[i].stat.def,&(p_tabInv)->vettInv[i].stat.mag,&(p_tabInv)->vettInv[i].stat.spr) != 8){
         i++;
     }
     fclose(fp);

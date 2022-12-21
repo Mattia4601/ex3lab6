@@ -28,6 +28,7 @@ typedef struct {
     int nPg;
 }tabPg_t;
 
+pg_t* allocaPg();
 inv_t** allocaVet_pEquip(int nMaxOggetti);
 tabPg_t* allocaTabPg();
 void freeVetEquip(inv_t **vEquip);

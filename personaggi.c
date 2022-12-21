@@ -141,15 +141,16 @@ void modListaPg(tabPg_t *pTabPg,int flag){
 tabPg_t* leggiFilePg(char *filename){
     FILE *fp;
     tabPg_t *pTabPg;
-    pg_t tmpPg;
+    pg_t *tmpPg;
+    tmpPg = allocaPg();
     pTabPg = allocaTabPg();
     fp = fopen(filename,"r");
     if (fp == NULL){
         printf("Errore apertura file\n");
         return NULL;
     }
-    while (leggiPg(fp,&tmpPg)!=0){
-        inserisciPgInLista(pTabPg,tmpPg);
+    while (leggiPg(fp,tmpPg)!=0){
+        inserisciPgInLista(pTabPg,*tmpPg);
         pTabPg->nPg++;
     }
     fclose(fp);
@@ -184,6 +185,9 @@ link newNodoPg(pg_t pg, link next) {
     if (n == NULL)
         return NULL;
     n->personaggio = pg;
+    n->personaggio.equip = malloc(sizeof(tabEquip_t));
+    n->personaggio.equip->vettEq = allocaVet_pEquip(8);
+    n->personaggio.equip->inUso=0;
     n->next = next;
     return n;
 }

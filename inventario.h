@@ -39,7 +39,7 @@ typedef tabInv_t *tabInv; //tabInv è un tipo puntatore a tabella inventario tab
 tabInv_t* creaTabInv(int maxInv);
 void cancellaTabInv(tabInv_t *pTabInv);
 void stampaOggetto(inv_t oggetto);
-void leggiOggetti(char *filename,tabInv_t **p_tabInv);
+void leggiOggetti(char *filename,tabInv_t *p_tabInv);
 int SearchObjByName(tabInv_t *ptabInv, char *name);
 inv_t *getByIndex(tabInv_t *ptabInv, int index);
 void stampaTabInv(tabInv_t *pTabInv);
