@@ -14,12 +14,13 @@ typedef struct {
     stat_t stat;
 }pg_t;
 
-typedef struct nodoPg_s nodoPg_t;
+
 typedef struct nodoPg_s *link;
-struct nodoPg_s{
+
+typedef struct nodoPg_s{
     pg_t personaggio;
     link next;
-};
+}nodoPg_t;
 
 typedef struct {
     link headPg;
@@ -37,4 +38,9 @@ void modificaEquip(pg_t *p_Pg,char nomeOgg[M],tabInv_t *pTabInv,int flag);
 void modListaPg(tabPg_t *pTabPg,int flag);
 tabPg_t* leggiFilePg(char *filename);
 void stampaTabPg(tabPg_t *pTabPg);
+link newNodoPg(pg_t pg, link next);
+int leggiPg(FILE *fp, pg_t* p_pg);
+void inserisciPgInLista(tabPg_t *pTabPg, pg_t pg);
+void aggiungiPgInput(tabPg_t *pTabPg);
+void eliminaPgDaInput(tabPg_t *tabPg_t, char* cod);
 #endif //ASDLAB6_PERSONAGGI_H

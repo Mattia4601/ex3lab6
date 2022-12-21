@@ -17,7 +17,7 @@ inv_t** allocaVet_pEquip(int nMaxOggetti){
 //alloca una tabella personaggi
 tabPg_t* allocaTabPg(){
     tabPg_t *pTabPg;
-    pTabPg = malloc(sizeof(tabPg_t));
+    pTabPg = calloc(1,sizeof(tabPg_t));
     if (pTabPg==NULL){
         printf("Errore allocazione tabella personaggi\n");
     }
@@ -35,8 +35,10 @@ void freeTabPg(tabPg_t *p_tabPg){
     link p,x;
     for (p=p_tabPg->headPg; p!=NULL; p=x){
         x=p->next;
-        freeVetEquip(p->personaggio.equip->vettEq);
-        free(p->personaggio.equip);
+        if(p->personaggio.equip != NULL) {
+            freeVetEquip(p->personaggio.equip->vettEq);
+            free(p->personaggio.equip);
+        }
         free(p);
     }
     free(p_tabPg);
@@ -126,77 +128,29 @@ void modListaPg(tabPg_t *pTabPg,int flag){
     int ok=0;
     char codice[M];
     if (flag == 1){//dobbiamo aggiungere un persinaggio alla lista
-        printf("scrivere separati da uno spazio codice,nome,classe e statistiche del personaggio\n");
-        fscanf(stdin,"%s,%s,%s",tmpPg.codice,tmpPg.nome,tmpPg.classe);
-        fscanf(stdin,"%d%d%d%d%d%d",&tmpPg.stat.hp,&tmpPg.stat.mp,&tmpPg.stat.atk,&tmpPg.stat.def,&tmpPg.stat.mag,&tmpPg.stat.spr);
-
-        //se la lista e' vuota inserisco in testa che corrisponde alla coda
-        if(pTabPg->headPg == NULL && pTabPg->tailPg == NULL){
-            (pTabPg->headPg->personaggio) = (pTabPg->tailPg->personaggio) = tmpPg;
-            (pTabPg->headPg->next) = (pTabPg->tailPg->next) = NULL;
-        }
-        else{//se nella lista c'e' gia' qualche elemento
-            (pTabPg->tailPg->next->personaggio) = tmpPg;
-            (pTabPg->tailPg) = (pTabPg->tailPg->next);//aggiorno la coda della lista
-        }
+        aggiungiPgInput(pTabPg);
     }
     else if(flag==0){//dobbiamo rimuovere un personaggio
         //chiedo all'utente il codice del personaggio da eliminare
         printf("Scrivere codice del personaggio da eliminare:\n");
         fscanf(stdin,"%s",codice);
-        for (p=NULL,x=pTabPg->headPg;ok==0 && x!=NULL;p=x, x=x->next){
-            if (strcmp(x->personaggio.codice,codice)==0){
-                ok=1;
-                if(x==pTabPg->headPg && x==pTabPg->tailPg){
-                    pTabPg->headPg=pTabPg->tailPg=NULL;
-                }
-                else if(x==pTabPg->headPg){
-                    pTabPg->headPg = x->next;
-                }
-                else if(pTabPg->tailPg == x){
-                    pTabPg->tailPg = p;
-                    p->next = NULL;
-                }
-                else{
-                    p->next = x->next;
-                }
-                if (x->personaggio.equip != NULL){
-                    //se ha un equipaggiamento devo liberare la memoria ad esso allocata
-                    free(x->personaggio.equip->vettEq);
-                    free(x->personaggio.equip);
-                }
-                free(x);
-            }
-        }
+        eliminaPgDaInput(pTabPg,codice);
     }
 }
 
 tabPg_t* leggiFilePg(char *filename){
-    tabPg_t *pTabPg;
     FILE *fp;
+    tabPg_t *pTabPg;
     pg_t tmpPg;
-    tmpPg.equip= NULL;
-    pTabPg=allocaTabPg();
+    pTabPg = allocaTabPg();
     fp = fopen(filename,"r");
     if (fp == NULL){
-        printf("Errore apertura file pg\n");
-        exit(-1);
+        printf("Errore apertura file\n");
+        return NULL;
     }
-    while(fscanf(fp,"%s%s%s%d%d%d%d%d%d",tmpPg.codice,tmpPg.nome,tmpPg.classe,&tmpPg.stat.hp,&tmpPg.stat.mp,&tmpPg.stat.atk,
-                 &tmpPg.stat.def,&tmpPg.stat.mag,&tmpPg.stat.spr)==9){
-        if (pTabPg->headPg == NULL && pTabPg->tailPg == NULL){//inserimento in testa perché lista e' vuota
-            pTabPg->headPg->personaggio.equip = malloc(sizeof(tabEquip_t));
-            pTabPg->headPg->personaggio.equip->vettEq = allocaVet_pEquip(8);
-            pTabPg->headPg->personaggio = pTabPg->tailPg->personaggio = tmpPg;
-            pTabPg->nPg++;//aggiorno contatore dei personaggi in lista
-        }
-        else{//altrimenti inserisco in coda alla lista
-            pTabPg->tailPg->next->personaggio.equip = calloc(1,sizeof(tabEquip_t));
-            pTabPg->tailPg->next->personaggio.equip->vettEq = allocaVet_pEquip(8);
-            pTabPg->tailPg->next->personaggio = tmpPg;
-            pTabPg->tailPg = pTabPg->tailPg->next;//aggiorno la coda della lista
-            pTabPg->nPg++;//aggiorno contatore dei personaggi in lista
-        }
+    while (leggiPg(fp,&tmpPg)!=0){
+        inserisciPgInLista(pTabPg,tmpPg);
+        pTabPg->nPg++;
     }
     fclose(fp);
     return pTabPg;
@@ -210,5 +164,86 @@ void stampaTabPg(tabPg_t *pTabPg){
     }
     for (x=pTabPg->headPg;x!=NULL; x=x->next){
         printPg(&(x->personaggio));
+    }
+}
+
+pg_t* allocaPg(){
+    pg_t *pg;
+    pg = (pg_t*) malloc(sizeof(pg_t));
+    pg->equip= malloc(sizeof(tabEquip_t));
+    pg->equip->vettEq=allocaVet_pEquip(8);
+    if (pg==NULL || pg->equip == NULL || pg->equip->vettEq == NULL){
+        printf("errore allocazione personaggio\n");
+        exit(-1);
+    }
+    return pg;
+}
+
+link newNodoPg(pg_t pg, link next) {
+    link n = calloc(1, sizeof(*n));
+    if (n == NULL)
+        return NULL;
+    n->personaggio = pg;
+    n->next = next;
+    return n;
+}
+int leggiPg(FILE *fp, pg_t* p_pg){
+
+    if(fscanf(fp,"%s%s%s",p_pg->codice,p_pg->nome,p_pg->classe) != 3){
+        return 0;
+    }
+    else{
+        if (fscanf(fp,"%d%d%d%d%d%d",&p_pg->stat.hp,&p_pg->stat.mp,
+                   &p_pg->stat.atk,&p_pg->stat.def,&p_pg->stat.mag,&p_pg->stat.spr) != 6){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void inserisciPgInLista(tabPg_t *pTabPg, pg_t pg){
+    link nuovoNodoPg;
+    nuovoNodoPg = newNodoPg(pg,NULL);
+    if (nuovoNodoPg==NULL || pTabPg==NULL){
+        return;
+    }
+    if (pTabPg->headPg == NULL){//inserimento in testa
+        pTabPg->headPg=pTabPg->tailPg=nuovoNodoPg;
+    }
+    else{
+        pTabPg->tailPg->next = nuovoNodoPg;//inserimento in coda
+        pTabPg->tailPg = nuovoNodoPg;//aggiorno la coda
+    }
+}
+
+void aggiungiPgInput(tabPg_t *pTabPg){
+    pg_t pg;
+
+    printf("Cod Nome Classe HP MP ATK DEF MAG SPR: ");
+    if (leggiPg(stdin, &pg)) {
+        inserisciPgInLista(pTabPg, pg);
+    }
+}
+
+
+void eliminaPgDaInput(tabPg_t *tabPg_t, char* cod){
+    link x, p;
+    for(x = tabPg_t->headPg, p = NULL; x != NULL; p = x, x=x->next) {//ricerca lineare del codice del pg
+        if (strcmp(x->personaggio.codice, cod) == 0) {
+            if (x == tabPg_t->headPg && x == tabPg_t->tailPg){//lista con un solo nodo -->> testa e coda della lista coincidono
+                tabPg_t->headPg = tabPg_t->tailPg = NULL;
+            } else if (x == tabPg_t->headPg){//elem da togliere sta in testa alla lista
+                tabPg_t->headPg = x->next;
+            } else if (x == tabPg_t->tailPg){//elem da togliere sta in coda
+                tabPg_t->tailPg = p;
+                p->next = NULL;
+            } else {
+                p->next = x->next;
+            }
+            freeVetEquip(x->personaggio.equip->vettEq);
+            free(x->personaggio.equip);
+            free(x);
+            break;
+        }
     }
 }
