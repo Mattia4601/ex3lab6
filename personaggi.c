@@ -104,6 +104,7 @@ void modificaEquip(pg_t *p_Pg,char nomeOgg[M],tabInv_t *pTabInv,int flag){
         for (j=0;j<i && ok==0;j++){//scandisco il vettore di equipaggiamento del personaggio
             if (strcmp(nomeOgg,p_Pg->equip->vettEq[j]->nome)==0){
                 ok=1;//segno che ho trovato e tolto l'oggetto
+                p_Pg->equip->inUso--;
                 p_Pg->stat.hp -= p_Pg->equip->vettEq[j]->stat.hp;
                 p_Pg->stat.mp -= p_Pg->equip->vettEq[j]->stat.mp;
                 p_Pg->stat.atk -= p_Pg->equip->vettEq[j]->stat.atk;
