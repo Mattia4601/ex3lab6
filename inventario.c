@@ -46,7 +46,7 @@ void leggiOggetti(char *filename,tabInv_t *p_tabInv){
 
     while ( fscanf(fp,"%s%s%d%d%d%d%d%d",p_tabInv->vettInv[i].nome,p_tabInv->vettInv[i].tipo,
                   &(p_tabInv)->vettInv[i].stat.hp,&(p_tabInv)->vettInv[i].stat.mp,&(p_tabInv)->vettInv[i].stat.atk,
-            &(p_tabInv)->vettInv[i].stat.def,&(p_tabInv)->vettInv[i].stat.mag,&(p_tabInv)->vettInv[i].stat.spr) != 8){
+            &(p_tabInv)->vettInv[i].stat.def,&(p_tabInv)->vettInv[i].stat.mag,&(p_tabInv)->vettInv[i].stat.spr) == 8){
         i++;
     }
     fclose(fp);
